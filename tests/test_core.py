@@ -1,6 +1,6 @@
 """Tests for budget core behavior."""
 
-from budget.core import add_transaction
+from budget.core import add_transaction, filter_by_category, get_balance
 
 
 def test_add_transaction_increases_length() -> None:
@@ -69,3 +69,146 @@ def test_add_transaction_allows_empty_description() -> None:
     result = add_transaction(transactions, transaction)
 
     assert result[0]["description"] == ""
+
+
+def test_get_balance_returns_zero_for_empty_list() -> None:
+    """An empty transaction list should produce zero balance."""
+    assert get_balance([]) == 0.0
+
+
+def test_get_balance_sums_step2_sample_data() -> None:
+    """Sample step2 transactions should sum to the expected balance."""
+    transactions = [
+        {
+            "date": "2026-01-04",
+            "type": "지출",
+            "category": "여행",
+            "description": "항공권",
+            "amount": -979796,
+            "memo": "메모_3",
+        },
+        {
+            "date": "2026-01-05",
+            "type": "지출",
+            "category": "의료",
+            "description": "한의원",
+            "amount": -65990,
+            "memo": "카드결제",
+        },
+        {
+            "date": "2026-01-15",
+            "type": "수입",
+            "category": "기타수입",
+            "description": "중고 판매",
+            "amount": 135541,
+            "memo": "",
+        },
+        {
+            "date": "2026-02-01",
+            "type": "수입",
+            "category": "급여",
+            "description": "월급",
+            "amount": 4358625,
+            "memo": "",
+        },
+    ]
+
+    assert get_balance(transactions) == 3448380
+
+
+def test_filter_by_category_matches_actual_category_names() -> None:
+    """Filtering should return matching transactions from the sample data."""
+    transactions = [
+        {
+            "date": "2026-01-10",
+            "type": "지출",
+            "category": "쇼핑",
+            "description": "생활용품",
+            "amount": -326526,
+            "memo": "",
+        },
+        {
+            "date": "2026-02-05",
+            "type": "지출",
+            "category": "쇼핑",
+            "description": "옷 구입",
+            "amount": -63587,
+            "memo": "메모_5",
+        },
+        {
+            "date": "2026-01-05",
+            "type": "지출",
+            "category": "의료",
+            "description": "한의원",
+            "amount": -65990,
+            "memo": "카드결제",
+        },
+    ]
+
+    result = filter_by_category(transactions, "쇼핑")
+
+    assert len(result) == 2
+    assert all(item["category"] == "쇼핑" for item in result)
+
+
+def test_filter_by_category_is_case_insensitive() -> None:
+    """Category matching should ignore case differences."""
+    transactions = [
+        {
+            "date": "2026-01-15",
+            "type": "지출",
+            "category": "문화/여가",
+            "description": "영화관",
+            "amount": -64470,
+            "memo": "현금",
+        }
+    ]
+
+    result = filter_by_category(transactions, "문화/여가".lower())
+
+    assert result == transactions
+
+
+def test_filter_by_category_returns_empty_list_for_missing_category() -> None:
+    """Missing categories should produce an empty list."""
+    transactions = [
+        {
+            "date": "2026-01-05",
+            "type": "지출",
+            "category": "의료",
+            "description": "한의원",
+            "amount": -65990,
+            "memo": "카드결제",
+        }
+    ]
+
+    assert filter_by_category(transactions, "식비") == []
+
+
+def test_filter_by_category_returns_independent_list() -> None:
+    """Returned results should not alias the original list."""
+    transactions = [
+        {
+            "date": "2026-01-10",
+            "type": "지출",
+            "category": "쇼핑",
+            "description": "생활용품",
+            "amount": -326526,
+            "memo": "",
+        }
+    ]
+
+    result = filter_by_category(transactions, "쇼핑")
+    result.append(
+        {
+            "date": "2026-02-05",
+            "type": "지출",
+            "category": "쇼핑",
+            "description": "옷 구입",
+            "amount": -63587,
+            "memo": "메모_5",
+        }
+    )
+
+    assert len(transactions) == 1
+    assert len(result) == 2
