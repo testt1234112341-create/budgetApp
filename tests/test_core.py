@@ -1,0 +1,21 @@
+"""Tests for budget core behavior."""
+
+from budget.core import add_transaction
+
+
+def test_add_transaction_increases_length() -> None:
+    """Adding a transaction should increase the list length by one."""
+    transactions = []
+    transaction = {
+        "date": "2026-01-05",
+        "type": "지출",
+        "category": "식비",
+        "description": "점심식사",
+        "amount": -12000,
+        "memo": "",
+    }
+
+    result = add_transaction(transactions, transaction)
+
+    assert len(result) == 1
+
