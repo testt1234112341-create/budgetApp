@@ -10,7 +10,7 @@ Transaction = Dict[str, Any]
 
 def add_transaction(transactions: List[Transaction], transaction: Transaction) -> List[Transaction]:
     """Return a new transaction list with one transaction appended."""
-    pass
+    return transactions + [transaction]
 
 
 def get_balance(transactions: List[Transaction]) -> float:
@@ -31,4 +31,3 @@ def load_transactions_from_csv(file_path: str) -> List[Transaction]:
 def monthly_summary(transactions: List[Transaction]) -> Dict[str, Dict[str, int]]:
     """Return monthly income, expense, and net totals."""
     pass
-
