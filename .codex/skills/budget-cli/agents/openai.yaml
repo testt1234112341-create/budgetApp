@@ -1,0 +1,3 @@
+display_name: Budget CLI
+short_description: TDD and quality workflow for the CSV-based budget app
+default_prompt: Follow the repository AGENTS.md rules, write tests first, keep functions small and typed, and verify complexity before commit.
