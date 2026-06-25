@@ -1,6 +1,12 @@
 """Tests for budget core behavior."""
 
-from budget.core import add_transaction, filter_by_category, get_balance
+from budget.core import (
+    add_transaction,
+    filter_by_category,
+    get_balance,
+    load_transactions_from_csv,
+    monthly_summary,
+)
 
 
 def test_add_transaction_increases_length() -> None:
@@ -212,3 +218,38 @@ def test_filter_by_category_returns_independent_list() -> None:
 
     assert len(transactions) == 1
     assert len(result) == 2
+
+
+def test_load_transactions_from_csv_reads_step1_sample() -> None:
+    """CSV loading should parse the step1 sample file correctly."""
+    result = load_transactions_from_csv("data/step1_transactions.csv")
+
+    assert len(result) == 10
+    assert result[0] == {
+        "date": "2026-01-05",
+        "type": "지출",
+        "category": "식비",
+        "description": "점심식사",
+        "amount": -12000,
+        "memo": "",
+    }
+    assert result[1]["amount"] == 3500000
+    assert isinstance(result[1]["amount"], int)
+
+
+def test_monthly_summary_groups_step3_sample_data() -> None:
+    """Monthly summary should aggregate income, expense, and net totals."""
+    transactions = load_transactions_from_csv("data/step3_transactions.csv")
+
+    result = monthly_summary(transactions)
+
+    assert result["2025-01"] == {
+        "income": 405037,
+        "expense": -2886860,
+        "net": -2481823,
+    }
+    assert result["2025-12"] == {
+        "income": 6867295,
+        "expense": -3540137,
+        "net": 3327158,
+    }
